@@ -109,7 +109,8 @@ app.post("/updatepage", (req, res, next) => {
   return next();
 });
 
-app.listen((arg) => {
+app.listen(process.env.PORT,() => {
   console.log("Server started.");
 });
+
 }
