@@ -1,7 +1,8 @@
+require("dotenv").config();
 const mongooseClient = require("mongoose");
 
 mongooseClient.connect(
-  "mongodb://root:example@localhost:27017/",
+  process.env.MONGODB_CONNECTION_STRING,
   { useNewUrlParser: true, useUnifiedTopology: true },
   (err) => {
     if (err) console.log(err);

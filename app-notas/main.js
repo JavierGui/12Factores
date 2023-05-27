@@ -40,77 +40,77 @@ if (cluster.isMaster) {
   });
 
 
-app.get("/", (req, res, next) => {
-  res.redirect("/index");
-});
-
-app
-  .route("/notes-add")
-  .get((req, res, next) => {
-    res.render("notes-add");
-  })
-  .post((req, res, next) => {
-    console.log(req.body);
-    const Note = new Notes({});
-
-    Note.title = req.body.title;
-    Note.description = req.body.description;
-    //save notes first
-    Note.save((err, product) => {
-      if (err) console.log(err);
-      console.log(product);
-    });
+  app.get("/", (req, res, next) => {
     res.redirect("/index");
   });
 
-app.get("/index", (req, res, next) => {
-  Notes.find({}).exec((err, document) => {
-    if (err) console.log(err);
-    let Data = [];
-    document.forEach((value) => {
-      Data.push(value);
+  app
+    .route("/notes-add")
+    .get((req, res, next) => {
+      res.render("notes-add");
+    })
+    .post((req, res, next) => {
+      console.log(req.body);
+      const Note = new Notes({});
+
+      Note.title = req.body.title;
+      Note.description = req.body.description;
+      //save notes first
+      Note.save((err, product) => {
+        if (err) console.log(err);
+        console.log(product);
+      });
+      res.redirect("/index");
     });
-    res.render("view", { data: Data });
-  });
-});
 
-app.get("/delete/:__id", (req, res, next) => {
-  Notes.findByIdAndRemove(
-    req.params.__id,
-    { useFindAndModify: false },
-    (err, document) => {
+  app.get("/index", (req, res, next) => {
+    Notes.find({}).exec((err, document) => {
       if (err) console.log(err);
-      console.log(document);
-    }
-  );
-  res.redirect("/index");
-});
-
-app.get("/updatepage/:__id", (req, res) => {
-  console.log("id for get request: " + req.id);
-  Notes.findById(req.id, (err, document) => {
-    console.log(document);
-
-    res.render("updatepage", { data: document });
+      let Data = [];
+      document.forEach((value) => {
+        Data.push(value);
+      });
+      res.render("view", { data: Data });
+    });
   });
-});
 
-app.post("/updatepage", (req, res, next) => {
-  console.log("id: " + req.id);
-  Notes.findByIdAndUpdate(
-    req.id,
-    { title: req.body.title, description: req.body.description },
-    { useFindAndModify: false },
-    (err, document) => {
-      console.log("updated");
-    }
-  );
-  res.redirect("/index");
-  return next();
-});
+  app.get("/delete/:__id", (req, res, next) => {
+    Notes.findByIdAndRemove(
+      req.params.__id,
+      { useFindAndModify: false },
+      (err, document) => {
+        if (err) console.log(err);
+        console.log(document);
+      }
+    );
+    res.redirect("/index");
+  });
 
-app.listen(process.env.PORT,() => {
-  console.log("Server started.");
-});
+  app.get("/updatepage/:__id", (req, res) => {
+    console.log("id for get request: " + req.id);
+    Notes.findById(req.id, (err, document) => {
+      console.log(document);
+
+      res.render("updatepage", { data: document });
+    });
+  });
+
+  app.post("/updatepage", (req, res, next) => {
+    console.log("id: " + req.id);
+    Notes.findByIdAndUpdate(
+      req.id,
+      { title: req.body.title, description: req.body.description },
+      { useFindAndModify: false },
+      (err, document) => {
+        console.log("updated");
+      }
+    );
+    res.redirect("/index");
+    return next();
+  });
+
+  app.listen(process.env.PORT,() => {
+    console.log("Server started.");
+  });
 
 }
