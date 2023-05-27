@@ -1,3 +1,5 @@
+require("dotenv").config();
+
 const express = require("express");
 const body_parser = require("body-parser");
 const path = require("path");
@@ -7,16 +9,36 @@ const Notes = require("./database");
 const updateRouter = require("./update-router");
 const app = express();
 
-app.set("view engine", "pug");
-app.set("views", path.join(__dirname, "views"));
+const cluster = require("cluster");
+const totalCPUs = require("os").cpus().length;
 
-app.use(body_parser.urlencoded({ extended: true }));
-app.use(body_parser.json());
-app.use("/updatepage", updateRouter);
-app.use((req, res, next) => {
-  console.log(req.method + " : " + req.url);
-  next();
-});
+
+if (cluster.isMaster) {
+  console.log(`Number of CPUs is ${totalCPUs}`);
+  console.log(`Master ${process.pid} is running`);
+ 
+  // Fork workers.
+  for (let i = 0; i < totalCPUs; i++) {
+    cluster.fork();
+  }
+ 
+  cluster.on("exit", (worker, code, signal) => {
+    console.log(`worker ${worker.process.pid} died`);
+    console.log("Let's fork another worker!");
+    cluster.fork();
+  });
+} else {
+  app.set("view engine", "pug");
+  app.set("views", path.join(__dirname, "views"));
+  
+  app.use(body_parser.urlencoded({ extended: true }));
+  app.use(body_parser.json());
+  app.use("/updatepage", updateRouter);
+  app.use((req, res, next) => {
+    console.log(req.method + " : " + req.url);
+    next();
+  });
+
 
 app.get("/", (req, res, next) => {
   res.redirect("/index");
@@ -90,3 +112,4 @@ app.post("/updatepage", (req, res, next) => {
 app.listen((arg) => {
   console.log("Server started.");
 });
+}
